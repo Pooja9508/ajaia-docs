@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ajaia Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/styles.css" />
+</head>
+<body>
+
+<div id="app-shell">
+
+  <!-- ── TOP BAR ──────────────────────────────────────────────────────────── -->
+  <nav id="topbar">
+    <button id="sidebar-toggle" title="Toggle sidebar">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+
+    <div class="topbar-logo">
+      <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="48" height="48" rx="10" fill="#4f86e8"/>
+        <rect x="12" y="14" width="24" height="3" rx="1.5" fill="white"/>
+        <rect x="12" y="21" width="24" height="3" rx="1.5" fill="white" opacity=".8"/>
+        <rect x="12" y="28" width="16" height="3" rx="1.5" fill="white" opacity=".6"/>
+        <circle cx="36" cy="34" r="7" fill="#22c27d"/>
+        <path d="M32.5 34l2 2 4-4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span>Ajaia Docs</span>
+    </div>
+
+    <input type="text" id="doc-title-input" placeholder="Untitled Document" disabled autocomplete="off" spellcheck="false" title="Click to rename" />
+    <span id="save-status"></span>
+    <span id="topbar-owner" class="topbar-owner-chip" style="display:none" title="Document owner"></span>
+    <div class="topbar-spacer"></div>
+
+    <div class="topbar-actions">
+      <button class="btn btn-ghost btn-sm" id="btn-word-goal" title="Set word count goal" disabled>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span>Goal</span>
+      </button>
+      <button class="btn btn-ghost btn-sm" id="btn-history" title="Version history" disabled>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.18-7.43"/></svg>
+        <span>History</span>
+      </button>
+      <button class="btn btn-ghost btn-sm" id="btn-export-md" title="Export as Markdown" disabled>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span>Export</span>
+      </button>
+      <button class="btn btn-ghost btn-sm" id="btn-section-share" title="Share a specific section" disabled>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 6 4 2 20 2 20 6"/><line x1="12" y1="2" x2="12" y2="22"/><line x1="4" y1="14" x2="20" y2="14"/></svg>
+        <span>Sections</span>
+      </button>
+      <button class="btn btn-primary btn-sm" id="btn-share" disabled>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        Share
+      </button>
+      <button class="btn btn-ghost btn-icon" id="btn-toggle-comments" title="Toggle comments">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      </button>
+      <button class="btn btn-ghost btn-icon" id="btn-dark-mode" title="Dark mode">🌙</button>
+      <div style="position:relative">
+        <button class="presence-avatar" id="user-avatar" style="background:var(--primary);margin-left:4px;cursor:pointer;border:none;width:30px;height:30px;font-size:13px" title="Account">?</button>
+        <div id="user-dropdown" style="display:none;position:absolute;right:0;top:38px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);min-width:160px;z-index:200;padding:4px">
+          <div style="padding:8px 12px;border-bottom:1px solid var(--border);font-size:12px;color:var(--text-500)" id="user-name"></div>
+          <button class="doc-action-btn" id="btn-logout" style="width:100%;padding:8px 12px;text-align:left;font-size:13px;color:var(--danger);display:flex;align-items:center;gap:6px">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Sign out
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── TOOLBAR PLACEHOLDER (sidebar column) ──────────────────────────────── -->
+  <div id="toolbar-sidebar-placeholder"></div>
+
+  <!-- ── TOOLBAR ───────────────────────────────────────────────────────────── -->
+  <div id="toolbar-bar">
+    <!-- Hidden Quill toolbar (Quill mounts to this) -->
+    <div id="quill-toolbar">
+      <span class="ql-formats">
+        <select class="ql-header">
+          <option value="1">Heading 1</option>
+          <option value="2">Heading 2</option>
+          <option value="3">Heading 3</option>
+          <option selected>Normal</option>
+        </select>
+      </span>
+      <span class="ql-formats">
+        <select class="ql-font">
+          <option selected>Sans-serif</option>
+          <option value="serif">Serif</option>
+          <option value="monospace">Monospace</option>
+        </select>
+      </span>
+      <span class="ql-formats">
+        <button class="ql-bold"></button>
+        <button class="ql-italic"></button>
+        <button class="ql-underline"></button>
+        <button class="ql-strike"></button>
+      </span>
+      <span class="ql-formats">
+        <button class="ql-script" value="sub"></button>
+        <button class="ql-script" value="super"></button>
+      </span>
+      <span class="ql-formats">
+        <select class="ql-color"></select>
+        <select class="ql-background"></select>
+      </span>
+      <span class="ql-formats">
+        <button class="ql-list" value="ordered"></button>
+        <button class="ql-list" value="bullet"></button>
+        <button class="ql-indent" value="-1"></button>
+        <button class="ql-indent" value="+1"></button>
+      </span>
+      <span class="ql-formats">
+        <select class="ql-align">
+          <option selected></option>
+          <option value="center"></option>
+          <option value="right"></option>
+          <option value="justify"></option>
+        </select>
+      </span>
+      <span class="ql-formats">
+        <button class="ql-blockquote"></button>
+        <button class="ql-code-block"></button>
+        <button class="ql-link"></button>
+        <button class="ql-image"></button>
+      </span>
+      <span class="ql-formats">
+        <button class="ql-clean"></button>
+      </span>
+    </div>
+
+    <!-- Visible tab buttons -->
+    <div class="toolbar-tabs">
+      <button class="toolbar-tab-btn active" data-tb-tab="home">Home</button>
+      <button class="toolbar-tab-btn" data-tb-tab="insert">Insert</button>
+    </div>
+
+    <!-- HOME panel -->
+    <div class="toolbar-panel active" data-tb-pane="home">
+      <!-- Font family -->
+      <div class="tb-group">
+        <select class="tb-select tb-font-family" id="tb-font-family" title="Font family">
+          <option value="">Default</option>
+          <option value="serif">Serif</option>
+          <option value="monospace">Monospace</option>
+        </select>
+      </div>
+      <div class="tb-sep"></div>
+
+      <!-- Font size -->
+      <div class="tb-group">
+        <select class="tb-select tb-font-size" id="tb-font-size" title="Font size">
+          <option value="">Normal</option>
+          <option value="small">Small</option>
+          <option value="large">Large</option>
+          <option value="huge">Huge</option>
+        </select>
+      </div>
+      <div class="tb-sep"></div>
+
+      <!-- Headings -->
+      <div class="tb-group">
+        <select class="tb-select" id="tb-heading" title="Heading" style="width:90px">
+          <option value="">Normal</option>
+          <option value="1">Heading 1</option>
+          <option value="2">Heading 2</option>
+          <option value="3">Heading 3</option>
+        </select>
+      </div>
+      <div class="tb-sep"></div>
+
+      <!-- Bold / Italic / Underline / Strike -->
+      <div class="tb-group">
+        <button class="tb-btn" id="tb-bold" data-fmt="bold" title="Bold (Ctrl+B)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/><path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/></svg>
+        </button>
+        <button class="tb-btn" id="tb-italic" data-fmt="italic" title="Italic (Ctrl+I)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="4" x2="10" y2="4"/><line x1="14" y1="20" x2="5" y2="20"/><line x1="15" y1="4" x2="9" y2="20"/></svg>
+        </button>
+        <button class="tb-btn" id="tb-underline" data-fmt="underline" title="Underline (Ctrl+U)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 3v7a6 6 0 0 0 6 6 6 6 0 0 0 6-6V3"/><line x1="4" y1="21" x2="20" y2="21"/></svg>
+        </button>
+        <button class="tb-btn" id="tb-strike" data-fmt="strike" title="Strikethrough">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><path d="M16 6C16 6 14 4 12 4C9 4 7 6 7 8C7 10.4 9.2 11.3 12 12"/><path d="M8 18C8 18 10 20 12 20C15 20 17 18 17 16C17 13.6 14.8 12.7 12 12"/></svg>
+        </button>
+      </div>
+      <div class="tb-sep"></div>
+
+      <!-- Subscript / Superscript -->
+      <div class="tb-group">
+        <button class="tb-btn" id="tb-sub" title="Subscript" data-fmt="script" data-val="sub" style="font-size:11px;font-weight:700">X₂</button>
+        <button class="tb-btn" id="tb-super" title="Superscript" data-fmt="script" data-val="super" style="font-size:11px;font-weight:700">X²</button>
+      </div>
+      <div class="tb-sep"></div>
+
+      <!-- Text color / highlight -->
+      <div class="tb-group">
+        <label class="tb-btn tb-color-label" id="tb-color-proxy" title="Text color" tabindex="0">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 7l-7 7 3.5 3.5L13 10M17 3l4 4-8 8-4-4z"/><line x1="2" y1="22" x2="22" y2="22"/></svg>
+          <span id="tb-color-bar" style="display:block;height:3px;width:14px;background:#000;border-radius:1px;margin-top:1px"></span>
+          <input type="color" id="tb-color-input" value="#000000" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none" tabindex="-1" />
+        </label>
+        <label class="tb-btn tb-color-label" id="tb-bg-proxy" title="Highlight color" tabindex="0">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          <span id="tb-bg-bar" style="display:block;height:3px;width:14px;background:#ffff00;border-radius:1px;margin-top:1px"></span>
+          <input type="color" id="tb-bg-input" value="#ffff00" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none" tabindex="-1" />
+        </label>
+      </div>
+      <div class="tb-sep"></div>
+
+      <!-- Lists / indent / align -->
+      <div class="tb-group">
+        <button class="tb-btn" id="tb-ol" title="Numbered list" data-fmt="list" data-val="ordered">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="10" y1="6" x2="21" y2="6"/><line x1="10" y1="12" x2="21" y2="12"/><line x1="10" y1="18" x2="21" y2="18"/><path d="M4 6h1v4"/><path d="M4 10h2"/><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+        </button>
+        <button class="tb-btn" id="tb-ul" title="Bullet list" data-fmt="list" data-val="bullet">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="9" y1="6" x2="20" y2="6"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="18" x2="20" y2="18"/><circle cx="4" cy="6" r="1" fill="currentColor"/><circle cx="4" cy="12" r="1" fill="currentColor"/><circle cx="4" cy="18" r="1" fill="currentColor"/></svg>
+        </button>
+        <button class="tb-btn" id="tb-outdent" title="Decrease indent" data-fmt="indent" data-val="-1">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="10" x2="7" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="7" y2="18"/><polyline points="11 8 7 10 11 12"/></svg>
+        </button>
+        <button class="tb-btn" id="tb-indent" title="Increase indent" data-fmt="indent" data-val="+1">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="10" x2="17" y2="10"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="14" x2="21" y2="14"/><line x1="3" y1="18" x2="17" y2="18"/><polyline points="7 8 11 10 7 12"/></svg>
+        </button>
+      </div>
+      <div class="tb-sep"></div>
+
+      <!-- Alignment -->
+      <div class="tb-group">
+        <button class="tb-btn" title="Align left" data-fmt="align" data-val="">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="6" x2="3" y2="6"/><line x1="15" y1="12" x2="3" y2="12"/><line x1="17" y1="18" x2="3" y2="18"/></svg>
+        </button>
+        <button class="tb-btn" title="Align center" data-fmt="align" data-val="center">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="6" x2="3" y2="6"/><line x1="17" y1="12" x2="7" y2="12"/><line x1="19" y1="18" x2="5" y2="18"/></svg>
+        </button>
+        <button class="tb-btn" title="Align right" data-fmt="align" data-val="right">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="12" x2="9" y2="12"/><line x1="21" y1="18" x2="7" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="tb-sep"></div>
+
+      <!-- Change case / line spacing / Find/Replace -->
+      <div class="tb-group">
+        <button class="tb-btn" id="tb-case" title="Change case">Aa</button>
+        <button class="tb-btn" id="tb-find" title="Find &amp; Replace (Ctrl+H)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </button>
+      </div>
+      <div class="tb-sep"></div>
+
+      <!-- Clean / Blockquote / Code -->
+      <div class="tb-group">
+        <button class="tb-btn" title="Blockquote" data-fmt="blockquote" data-val="true">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/></svg>
+        </button>
+        <button class="tb-btn" title="Code block" data-fmt="code-block" data-val="true">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        </button>
+        <button class="tb-btn" id="tb-link" title="Insert link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        </button>
+        <button class="tb-btn" id="tb-clean" title="Clear formatting">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M5 7l1 12a2 2 0 002 2h8a2 2 0 002-2l1-12"/><path d="M9 7V4h6v3"/></svg>
+        </button>
+      </div>
+
+      <!-- Import into doc (right side) -->
+      <div style="margin-left:auto;display:flex;align-items:center;gap:6px">
+        <button class="btn btn-ghost btn-sm" id="btn-import-into-doc" title="Import file content into this document" style="font-size:11px">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Import
+        </button>
+        <input type="file" id="import-into-doc-input" accept=".txt,.md,.docx" style="display:none" />
+      </div>
+    </div>
+
+    <!-- INSERT panel -->
+    <div class="toolbar-panel" data-tb-pane="insert">
+      <!-- Table picker -->
+      <div class="tb-group" style="position:relative">
+        <button class="tb-btn" id="tb-table" title="Insert table" style="width:auto;padding:0 8px;gap:4px;font-size:12px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+          Table
+        </button>
+        <div class="table-picker-popup" id="table-picker-popup">
+          <div class="table-picker-grid" id="table-picker-grid"></div>
+          <div class="table-picker-label" id="table-picker-label">0 × 0</div>
+        </div>
+      </div>
+      <div class="tb-sep"></div>
+
+      <!-- Image upload -->
+      <div class="tb-group">
+        <button class="tb-btn" id="tb-image" title="Insert image" style="width:auto;padding:0 8px;gap:4px;font-size:12px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          Image
+        </button>
+        <input type="file" id="image-upload-input" accept=".jpg,.jpeg,.png,.gif,.webp" style="display:none" />
+      </div>
+      <div class="tb-sep"></div>
+
+      <!-- Page break -->
+      <div class="tb-group">
+        <button class="tb-btn" id="tb-page-break" title="Insert page break" style="width:auto;padding:0 8px;gap:4px;font-size:12px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12" stroke-dasharray="3 3"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          Page Break
+        </button>
+      </div>
+      <div class="tb-sep"></div>
+
+      <!-- Horizontal rule / Link -->
+      <div class="tb-group">
+        <button class="tb-btn" id="tb-hr" title="Insert horizontal rule" style="width:auto;padding:0 8px;gap:4px;font-size:12px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/></svg>
+          Rule
+        </button>
+      </div>
+    </div>
+
+    <!-- Find/Replace bar (positioned inside toolbar-bar context) -->
+    <div id="find-replace-bar">
+      <div class="fr-row">
+        <input class="fr-input" id="fr-find-input" placeholder="Find…" />
+        <span class="fr-count" id="fr-count"></span>
+        <button class="btn btn-ghost btn-sm" id="fr-prev" title="Previous">&#8593;</button>
+        <button class="btn btn-ghost btn-sm" id="fr-next" title="Next">&#8595;</button>
+      </div>
+      <div class="fr-row">
+        <input class="fr-input" id="fr-replace-input" placeholder="Replace with…" />
+        <button class="btn btn-secondary btn-sm" id="fr-replace-one">Replace</button>
+        <button class="btn btn-secondary btn-sm" id="fr-replace-all">All</button>
+        <button class="btn btn-ghost btn-sm" id="fr-close" title="Close">✕</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toolbar-comments-placeholder"></div>
+
+  <!-- ── SIDEBAR ────────────────────────────────────────────────────────────── -->
+  <aside id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-search">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="search-input" placeholder="Search documents…" />
+      </div>
+      <button class="btn-new-doc" id="btn-new-doc">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New Document
+      </button>
+    </div>
+    <div class="sidebar-scrollable">
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">My Documents</div>
+        <ul id="owned-list"></ul>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Shared with me</div>
+        <ul id="shared-list"></ul>
+      </div>
+    </div>
+    <div class="sidebar-upload">
+      <div class="upload-zone" id="upload-zone" title="Import .txt, .md, .docx or images">
+        <div class="upload-icon">📂</div>
+        <div style="font-size:12px;font-weight:600;color:var(--sidebar-muted)">Import file</div>
+        <p>.txt · .md · .docx</p>
+      </div>
+      <input type="file" id="file-input" accept=".txt,.md,.docx" />
+    </div>
+  </aside>
+
+  <!-- ── EDITOR AREA ────────────────────────────────────────────────────────── -->
+  <main id="editor-area">
+    <div id="editor-empty-state">
+      <div class="empty-icon">📝</div>
+      <h3>No document open</h3>
+      <p>Select a document from the sidebar, or create a new one to get started.</p>
+      <button class="btn btn-primary" onclick="App.createDocument()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New Document
+      </button>
+    </div>
+    <div id="editor-paper-wrap" style="display:none;width:100%;flex-direction:column;align-items:center">
+      <div class="editor-paper">
+        <div id="quill-editor" spellcheck="true"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ── COMMENTS PANEL ────────────────────────────────────────────────────── -->
+  <aside id="comments-panel">
+    <div class="comments-header">
+      <h3>Comments</h3>
+      <button class="btn-add-comment" id="btn-add-comment">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add
+      </button>
+    </div>
+    <div id="comments-list">
+      <div class="comments-empty"><div>💬</div>Open a document to see comments.</div>
+    </div>
+    <div id="comment-form">
+      <textarea id="comment-input" placeholder="Add a comment… (tip: select text first to anchor it)" rows="3"></textarea>
+      <div class="comment-form-actions">
+        <button class="btn btn-ghost btn-sm" id="btn-cancel-comment">Cancel</button>
+        <button class="btn btn-primary btn-sm" id="btn-submit-comment">Post</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── STATUS BAR ────────────────────────────────────────────────────────── -->
+  <div id="status-bar">
+    <span id="word-count-display">0 words</span>
+    <span class="status-sep">·</span>
+    <span id="char-count-display">0 chars</span>
+    <div id="word-goal-bar-wrap">
+      <span class="status-sep">·</span>
+      <span style="font-size:11px;color:var(--text-400);white-space:nowrap">Goal:</span>
+      <div class="wg-track"><div class="wg-fill" id="wg-fill" style="width:0%"></div></div>
+      <span id="word-goal-text"></span>
+    </div>
+    <div id="presence-indicator" style="margin-left:auto;display:flex;align-items:center;gap:4px"></div>
+  </div>
+
+</div><!-- /#app-shell -->
+
+<!-- Word limit warning popup -->
+<div id="word-limit-warning">
+  <span class="wlw-message" id="wlw-message"></span>
+  <div class="wlw-actions">
+    <button class="btn btn-secondary btn-sm" id="wlw-increase">Increase Goal</button>
+    <button class="btn btn-ghost btn-sm" id="wlw-ignore">Ignore</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     MODALS
+════════════════════════════════════════════════════════════════════════════ -->
+
+<!-- Share document modal -->
+<div class="modal-overlay" id="share-modal">
+  <div class="modal modal-md">
+    <div class="modal-header">
+      <h2>Share Document</h2>
+      <button class="modal-close" data-modal-close="share-modal">✕</button>
+    </div>
+    <div class="modal-tabs">
+      <div class="modal-tab active" data-tab="share-add">Add People</div>
+      <div class="modal-tab" data-tab="share-current">Who Has Access</div>
+      <div class="modal-tab" data-tab="share-link">Public Link</div>
+      <div class="modal-tab" data-tab="share-requests">Requests</div>
+    </div>
+    <div class="modal-body">
+      <!-- Add by username -->
+      <div class="modal-tab-pane active" data-pane="share-add">
+        <div class="form-group">
+          <label class="form-label">Share with username</label>
+          <div class="form-row">
+            <select class="form-select" id="share-user-select"><option value="">Loading users…</option></select>
+            <select class="form-select" id="share-permission-select" style="max-width:110px">
+              <option value="viewer">Viewer</option>
+              <option value="editor">Editor</option>
+            </select>
+          </div>
+          <p style="font-size:11px;color:var(--text-400);margin-top:6px"><strong>Viewer</strong> can read but not edit. <strong>Editor</strong> can edit content.</p>
+        </div>
+        <div class="form-group" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+          <label class="form-label">Or invite by email</label>
+          <div class="form-row">
+            <input type="email" class="form-input" id="invite-email-input" placeholder="colleague@example.com" />
+            <select class="form-select" id="invite-permission-select" style="max-width:110px">
+              <option value="viewer">Viewer</option>
+              <option value="editor">Editor</option>
+            </select>
+          </div>
+          <div id="invite-link-result" style="display:none;margin-top:8px"></div>
+        </div>
+      </div>
+      <!-- Who has access -->
+      <div class="modal-tab-pane" data-pane="share-current">
+        <div id="current-shares-list"></div>
+      </div>
+      <!-- Public link -->
+      <div class="modal-tab-pane" data-pane="share-link">
+        <div id="public-link-section">
+          <p style="font-size:12px;color:var(--text-500);margin-bottom:14px">Anyone with the link can access this document without signing in.</p>
+          <div class="form-group">
+            <label class="form-label">Link permission</label>
+            <select class="form-select" id="public-link-permission" style="max-width:140px">
+              <option value="viewer">Viewer (read-only)</option>
+              <option value="editor">Editor (can edit)</option>
+            </select>
+          </div>
+          <div style="display:flex;gap:8px;margin-bottom:12px">
+            <button class="btn btn-primary btn-sm" id="btn-enable-public-link">Generate Link</button>
+            <button class="btn btn-danger btn-sm" id="btn-disable-public-link" style="display:none">Disable Link</button>
+          </div>
+          <div id="public-link-display" style="display:none">
+            <div class="public-link-box">
+              <span class="public-link-url" id="public-link-url"></span>
+              <button class="btn btn-secondary btn-sm" id="btn-copy-public-link">Copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Access requests -->
+      <div class="modal-tab-pane" data-pane="share-requests">
+        <div id="access-requests-list">
+          <p style="font-size:12px;color:var(--text-400);padding:8px">No pending access requests.</p>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-modal-close="share-modal">Close</button>
+      <button class="btn btn-primary" id="btn-submit-share">Share</button>
+    </div>
+  </div>
+</div>
+
+<!-- Section share modal -->
+<div class="modal-overlay" id="section-share-modal">
+  <div class="modal modal-md">
+    <div class="modal-header">
+      <h2>Share a Section</h2>
+      <button class="modal-close" data-modal-close="section-share-modal">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:12px;color:var(--text-500);margin-bottom:14px">Select a heading to share only that section with a collaborator.</p>
+      <div class="form-group">
+        <label class="form-label">Select section</label>
+        <div id="section-list"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Share with</label>
+        <div class="form-row">
+          <select class="form-select" id="section-share-user-select"><option value="">Select a user…</option></select>
+          <select class="form-select" id="section-share-permission" style="max-width:110px">
+            <option value="viewer">Viewer</option>
+            <option value="editor">Editor</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-modal-close="section-share-modal">Cancel</button>
+      <button class="btn btn-primary" id="btn-submit-section-share">Share Section</button>
+    </div>
+  </div>
+</div>
+
+<!-- Version history modal -->
+<div class="modal-overlay" id="version-modal">
+  <div class="modal modal-md">
+    <div class="modal-header">
+      <h2>Version History</h2>
+      <button class="modal-close" data-modal-close="version-modal">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:12px;color:var(--text-500);margin-bottom:14px">Last 10 auto-saved versions. Restoring also rolls back comments created after that snapshot.</p>
+      <div id="version-list"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-modal-close="version-modal">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Word goal modal -->
+<div class="modal-overlay" id="word-goal-modal">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h2>Word Count Goal</h2>
+      <button class="modal-close" data-modal-close="word-goal-modal">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="wg-current" id="wg-current-count">0</div>
+      <div class="wg-label">current word count</div>
+      <div class="form-group">
+        <label class="form-label">Target word count</label>
+        <input type="number" class="form-input" id="word-goal-input" placeholder="e.g. 500" min="1" max="100000" />
+        <p style="font-size:11px;color:var(--text-400);margin-top:5px">A progress bar will appear in the status bar. Leave empty to clear the goal.</p>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-modal-close="word-goal-modal">Cancel</button>
+      <button class="btn btn-primary" id="btn-save-word-goal">Set Goal</button>
+    </div>
+  </div>
+</div>
+
+<!-- Grammar check modal -->
+<div class="modal-overlay" id="grammar-modal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <h2>Grammar &amp; Spell Check</h2>
+      <button class="modal-close" data-modal-close="grammar-modal">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="grammar-results">
+        <div style="text-align:center;padding:32px;color:var(--text-400)">Run grammar check to see results.</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-modal-close="grammar-modal">Close</button>
+      <button class="btn btn-primary" onclick="Editor.checkGrammar()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.18-7.43"/></svg>
+        Re-check
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div id="toast-container"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     SCRIPTS
+════════════════════════════════════════════════════════════════════════════ -->
+<script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+<script src="/static/js/auth.js"></script>
+<script src="/static/js/app.js"></script>
+<script src="/static/js/editor.js"></script>
+
+<script>
+  if (!Auth.isLoggedIn()) window.location.href = '/';
+
+  function _enableDocControls(enabled) {
+    ['btn-word-goal','btn-history','btn-export-md','btn-section-share','btn-share','doc-title-input'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.disabled = !enabled;
+    });
+  }
+
+  // User dropdown
+  document.getElementById('user-avatar')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const dd = document.getElementById('user-dropdown');
+    if (dd) dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
+  });
+  document.addEventListener('click', () => {
+    const dd = document.getElementById('user-dropdown');
+    if (dd) dd.style.display = 'none';
+  });
+
+  // Patch Editor.loadDocument to enable controls
+  const _origLoad = Editor.loadDocument.bind(Editor);
+  Editor.loadDocument = async function(id) {
+    await _origLoad(id);
+    _enableDocControls(true);
+  };
+
+  const _origClear = Editor.clearEditor.bind(Editor);
+  Editor.clearEditor = function() {
+    _origClear();
+    _enableDocControls(false);
+  };
+
+  Editor.init();
+  App.init();
+
+  // Check for invite token in URL
+  const params = new URLSearchParams(location.search);
+  const inviteToken = params.get('invite');
+  if (inviteToken) {
+    Auth.apiFetch(`/api/invitations/accept?token=${encodeURIComponent(inviteToken)}`, { method: 'POST' })
+      .then(r => r.json())
+      .then(d => {
+        if (d.doc_id) {
+          history.replaceState({}, '', '/app');
+          Toast.show('Invitation accepted! Opening document…', 'success');
+          setTimeout(() => App.openDocument(d.doc_id), 800);
+        }
+      })
+      .catch(() => {});
+  }
+</script>
+</body>
+</html>

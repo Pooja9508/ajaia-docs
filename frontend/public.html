@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ajaia Docs — Shared Document</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/styles.css" />
+</head>
+<body>
+  <div id="public-viewer">
+
+    <!-- Top bar -->
+    <div id="public-topbar">
+      <div class="public-brand">
+        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" width="28" height="28">
+          <rect width="32" height="32" rx="8" fill="#1a56db"/>
+          <rect x="8" y="9" width="16" height="2" rx="1" fill="white"/>
+          <rect x="8" y="14" width="16" height="2" rx="1" fill="white" opacity=".8"/>
+          <rect x="8" y="19" width="10" height="2" rx="1" fill="white" opacity=".6"/>
+        </svg>
+        <span>Ajaia Docs</span>
+      </div>
+      <div id="public-doc-title">Loading…</div>
+      <div id="public-topbar-actions">
+        <span id="public-permission-badge"></span>
+        <a href="/" class="public-sign-in-btn">Sign in to edit</a>
+      </div>
+    </div>
+
+    <!-- Document paper -->
+    <div id="public-paper-wrap">
+      <div id="public-paper">
+        <div id="public-editor-container"></div>
+      </div>
+    </div>
+
+    <!-- Error state -->
+    <div id="public-error" style="display:none">
+      <div class="public-error-card">
+        <div class="public-error-icon">🔒</div>
+        <h2 id="public-error-title">Document not found</h2>
+        <p id="public-error-msg">This link may have expired or the document is no longer shared publicly.</p>
+        <a href="/" class="login-submit" style="display:inline-block;text-decoration:none;padding:10px 24px;">Go to Ajaia Docs</a>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+  <script>
+    (async () => {
+      // Extract token from path: /p/<token>
+      const token = window.location.pathname.split('/p/')[1]?.split('/')[0];
+      if (!token) return showError('Invalid link', 'No document token found in this URL.');
+
+      // Check for pending invitation in session and handle after auth
+      const inviteParam = new URLSearchParams(window.location.search).get('invite');
+
+      // Init Quill in read-only mode
+      const quill = new Quill('#public-editor-container', {
+        theme: 'snow',
+        readOnly: true,
+        modules: { toolbar: false },
+      });
+
+      try {
+        const res = await fetch(`/api/public/${token}`);
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.detail || 'Failed to load document');
+        }
+        const doc = await res.json();
+
+        // Update title
+        document.title = `${doc.title} — Ajaia Docs`;
+        document.getElementById('public-doc-title').textContent = doc.title;
+
+        // Permission badge
+        const badge = document.getElementById('public-permission-badge');
+        if (doc.public_permission === 'editor') {
+          badge.textContent = 'Anyone can edit';
+          badge.className = 'public-badge-editor';
+          // If editor permission, show edit link
+          if (localStorage.getItem('ajaia_token')) {
+            const editLink = document.createElement('a');
+            editLink.href = '/app';
+            editLink.className = 'public-sign-in-btn';
+            editLink.textContent = 'Open in editor';
+            document.getElementById('public-topbar-actions').prepend(editLink);
+          }
+        } else {
+          badge.textContent = 'View only';
+          badge.className = 'public-badge-viewer';
+        }
+
+        // Load content
+        try {
+          const delta = JSON.parse(doc.content_delta);
+          quill.setContents(delta);
+        } catch {
+          quill.setText(doc.content_delta || '');
+        }
+
+        // Show paper
+        document.getElementById('public-paper-wrap').style.display = 'flex';
+
+        // If signed in and editor permission, offer to request edit access
+        const token_stored = localStorage.getItem('ajaia_token');
+        if (token_stored && doc.public_permission === 'viewer') {
+          const bar = document.createElement('div');
+          bar.className = 'public-request-bar';
+          bar.innerHTML = `
+            <span>Want to edit this document?</span>
+            <button id="btn-public-req-edit">Request Edit Access</button>
+          `;
+          document.getElementById('public-topbar').appendChild(bar);
+          document.getElementById('btn-public-req-edit')?.addEventListener('click', async () => {
+            const msg = prompt('Add a message to the owner (optional):') || '';
+            const r = await fetch(`/api/documents/${doc.id}/access-requests`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token_stored,
+              },
+              body: JSON.stringify({ requested_permission: 'editor', message: msg }),
+            });
+            if (r.ok) {
+              bar.innerHTML = '<span style="color:#10b981">✓ Request sent to the document owner.</span>';
+            } else {
+              const d = await r.json().catch(() => ({}));
+              alert(d.detail || 'Failed to send request');
+            }
+          });
+        }
+
+      } catch (e) {
+        showError('Document unavailable', e.message);
+      }
+
+      function showError(title, msg) {
+        document.getElementById('public-paper-wrap').style.display = 'none';
+        document.getElementById('public-error').style.display = 'flex';
+        document.getElementById('public-error-title').textContent = title;
+        document.getElementById('public-error-msg').textContent = msg;
+      }
+    })();
+  </script>
+</body>
+</html>

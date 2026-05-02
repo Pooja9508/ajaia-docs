@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ajaia Docs — Sign In</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/styles.css" />
+  <style>
+    body { background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #1d4ed8 100%); }
+  </style>
+</head>
+<body>
+  <div id="login-page">
+    <div class="login-card">
+
+      <!-- Logo -->
+      <div class="login-logo">
+        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="48" height="48" rx="12" fill="#1a56db"/>
+          <rect x="12" y="14" width="24" height="3" rx="1.5" fill="white"/>
+          <rect x="12" y="21" width="24" height="3" rx="1.5" fill="white" opacity=".8"/>
+          <rect x="12" y="28" width="16" height="3" rx="1.5" fill="white" opacity=".6"/>
+          <circle cx="36" cy="34" r="7" fill="#10b981"/>
+          <path d="M32.5 34l2 2 4-4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <h1>Ajaia Docs</h1>
+        <p>Collaborative document editing for modern teams</p>
+      </div>
+
+      <!-- Auth tabs -->
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="signin">Sign In</button>
+        <button class="auth-tab" data-tab="register">Create Account</button>
+      </div>
+
+      <!-- Sign In panel -->
+      <div class="auth-panel active" id="panel-signin">
+        <div class="login-form">
+          <div class="login-input-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" autocomplete="username" placeholder="Enter your username" autofocus />
+          </div>
+          <div class="login-input-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" autocomplete="current-password" placeholder="Enter your password" />
+          </div>
+          <button class="login-submit" id="login-btn" type="button">
+            <span id="login-btn-text">Sign In</span>
+          </button>
+          <div class="login-error" id="login-error"></div>
+        </div>
+      </div>
+
+      <!-- Register panel -->
+      <div class="auth-panel" id="panel-register">
+        <div class="login-form">
+          <div class="login-input-group">
+            <label for="reg-username">Username</label>
+            <input type="text" id="reg-username" autocomplete="username" placeholder="Choose a username" />
+          </div>
+          <div class="login-input-group">
+            <label for="reg-email">Email</label>
+            <input type="email" id="reg-email" autocomplete="email" placeholder="your@email.com" />
+          </div>
+          <div class="login-input-group">
+            <label for="reg-password">Password</label>
+            <input type="password" id="reg-password" autocomplete="new-password" placeholder="Choose a password (min 6 chars)" />
+          </div>
+          <div class="login-input-group">
+            <label for="reg-confirm">Confirm Password</label>
+            <input type="password" id="reg-confirm" autocomplete="new-password" placeholder="Repeat your password" />
+          </div>
+          <button class="login-submit" id="register-btn" type="button">
+            <span id="register-btn-text">Create Account</span>
+          </button>
+          <div class="login-error" id="register-error"></div>
+          <div class="login-success" id="register-success"></div>
+        </div>
+      </div>
+
+      <!-- Demo users (sign-in only) -->
+      <div class="demo-hints" id="demo-hints">
+        <h4>Demo Accounts</h4>
+        <div class="demo-user-list">
+          <button class="demo-user-btn" data-user="alice" data-pass="password123">
+            <div class="demo-user-avatar" style="background:#1a56db">A</div>
+            <div class="demo-user-info">
+              <span class="demo-user-name">Alice</span>
+              <span class="demo-user-pass">password123</span>
+            </div>
+          </button>
+          <button class="demo-user-btn" data-user="bob" data-pass="password123">
+            <div class="demo-user-avatar" style="background:#10b981">B</div>
+            <div class="demo-user-info">
+              <span class="demo-user-name">Bob</span>
+              <span class="demo-user-pass">password123</span>
+            </div>
+          </button>
+          <button class="demo-user-btn" data-user="carol" data-pass="password123">
+            <div class="demo-user-avatar" style="background:#8b5cf6">C</div>
+            <div class="demo-user-info">
+              <span class="demo-user-name">Carol</span>
+              <span class="demo-user-pass">password123</span>
+            </div>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="/static/js/auth.js"></script>
+  <script>
+    if (Auth.isLoggedIn()) window.location.href = '/app';
+
+    // ── Tab switching ──────────────────────────────────────────────────────────
+    document.querySelectorAll('.auth-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.auth-panel').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+        // Hide demo hints on register tab
+        const hints = document.getElementById('demo-hints');
+        if (hints) hints.style.display = tab.dataset.tab === 'register' ? 'none' : '';
+        clearErrors();
+      });
+    });
+
+    function clearErrors() {
+      ['login-error', 'register-error', 'register-success'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.textContent = ''; el.classList.remove('visible'); }
+      });
+    }
+
+    // ── Sign In ────────────────────────────────────────────────────────────────
+    const loginBtn  = document.getElementById('login-btn');
+    const userInput = document.getElementById('username');
+    const passInput = document.getElementById('password');
+    const errEl     = document.getElementById('login-error');
+    const btnText   = document.getElementById('login-btn-text');
+
+    async function doLogin(username, password) {
+      errEl.classList.remove('visible');
+      loginBtn.disabled = true;
+      btnText.innerHTML = '<span class="spinner"></span>';
+      try {
+        await Auth.login(username, password);
+        window.location.href = '/app';
+      } catch (e) {
+        errEl.textContent = e.message;
+        errEl.classList.add('visible');
+        btnText.textContent = 'Sign In';
+        loginBtn.disabled = false;
+      }
+    }
+
+    loginBtn.addEventListener('click', () => doLogin(userInput.value.trim(), passInput.value));
+    [userInput, passInput].forEach(el => {
+      el.addEventListener('keydown', (e) => { if (e.key === 'Enter') doLogin(userInput.value.trim(), passInput.value); });
+    });
+
+    // Demo user one-click fill + login
+    document.querySelectorAll('.demo-user-btn').forEach(btn => {
+      btn.addEventListener('click', () => doLogin(btn.dataset.user, btn.dataset.pass));
+    });
+
+    // ── Register ───────────────────────────────────────────────────────────────
+    const regBtn      = document.getElementById('register-btn');
+    const regBtnText  = document.getElementById('register-btn-text');
+    const regErrEl    = document.getElementById('register-error');
+    const regOkEl     = document.getElementById('register-success');
+
+    async function doRegister() {
+      const username = document.getElementById('reg-username').value.trim();
+      const email    = document.getElementById('reg-email').value.trim();
+      const password = document.getElementById('reg-password').value;
+      const confirm  = document.getElementById('reg-confirm').value;
+
+      regErrEl.textContent = '';
+      regErrEl.classList.remove('visible');
+      regOkEl.textContent = '';
+
+      if (!username || !email || !password) {
+        regErrEl.textContent = 'All fields are required.';
+        regErrEl.classList.add('visible');
+        return;
+      }
+      if (password.length < 6) {
+        regErrEl.textContent = 'Password must be at least 6 characters.';
+        regErrEl.classList.add('visible');
+        return;
+      }
+      if (password !== confirm) {
+        regErrEl.textContent = 'Passwords do not match.';
+        regErrEl.classList.add('visible');
+        return;
+      }
+
+      regBtn.disabled = true;
+      regBtnText.innerHTML = '<span class="spinner"></span>';
+
+      try {
+        const res = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, email, password }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'Registration failed');
+
+        // Auto-login using Auth.login so token lands in sessionStorage
+        await Auth.login(username, password);
+        window.location.href = '/app';
+      } catch (e) {
+        regErrEl.textContent = e.message;
+        regErrEl.classList.add('visible');
+        regBtnText.textContent = 'Create Account';
+        regBtn.disabled = false;
+      }
+    }
+
+    regBtn.addEventListener('click', doRegister);
+    ['reg-username','reg-email','reg-password','reg-confirm'].forEach(id => {
+      document.getElementById(id)?.addEventListener('keydown', (e) => { if (e.key === 'Enter') doRegister(); });
+    });
+  </script>
+</body>
+</html>

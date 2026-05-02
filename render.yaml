@@ -1,0 +1,34 @@
+# Render.com deployment configuration
+# Free tier: web service (512 MB RAM) + PostgreSQL (90-day free)
+#
+# Deploy steps:
+#   1. Push this repo to GitHub
+#   2. Go to dashboard.render.com → New → Blueprint
+#   3. Connect your GitHub repo — Render reads this file automatically
+#   4. Deploy. First boot auto-seeds demo users.
+
+services:
+  - type: web
+    name: ajaia-docs
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/auth/me
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true          # Render generates a secure random value
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: "480"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ajaia-docs-db
+          property: connectionString
+      - key: UPLOADS_DIR
+        value: /opt/render/project/src/uploads
+
+databases:
+  - name: ajaia-docs-db
+    plan: free
+    databaseName: ajaia_docs
+    user: ajaia
