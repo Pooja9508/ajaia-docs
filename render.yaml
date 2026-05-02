@@ -15,7 +15,7 @@ services:
     pythonVersion: "3.11.0"
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
-    healthCheckPath: /api/auth/me
+    healthCheckPath: /health
     envVars:
       - key: SECRET_KEY
         generateValue: true          # Render generates a secure random value

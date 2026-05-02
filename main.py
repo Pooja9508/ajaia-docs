@@ -256,6 +256,11 @@ def _snapshot(doc: models.Document, user_id: int, db: Session):
 
 
 # ── HTML routes ────────────────────────────────────────────────────────────────
+@app.get("/health")
+async def health_check():
+    return {"status": "ok"}
+
+
 @app.get("/")
 async def serve_login():
     return FileResponse(str(FRONTEND_PATH / "index.html"))
