@@ -66,8 +66,8 @@ See `WALKTHROUGH_VIDEO.txt`
 - Subscript and superscript
 - Change case: UPPERCASE, lowercase, Title Case, Sentence case
 - Find and Replace (Ctrl+H) — prev/next navigation, replace one, replace all
-- Table insert via visual 8×8 grid picker
-- Image insert from file (JPEG, PNG, GIF, WebP) — uploaded to server and embedded
+- Table insert via visual 8×8 grid picker - WORK IN PROGRESS
+- Image insert from file (JPEG, PNG, GIF, WebP) — uploaded to server and embedded - WORK IN PROGRESS
 - Page break and horizontal rule
 
 ### Documents
@@ -120,6 +120,7 @@ See `WALKTHROUGH_VIDEO.txt`
 | PDF export | Not implemented. Would require `weasyprint` or headless browser — deferred in favour of depth elsewhere. |
 | Section content redaction | Section-share metadata returned by API; frontend does not yet visually grey out inaccessible sections for shared users. |
 | Persistent file storage | Uploaded images live on local disk. On Render free tier the disk is ephemeral — a production deploy would use S3/Cloudflare R2. |
+| Inserting Table and Images on the Editor | WORK IN PROGRESS |  
 
 ---
 
@@ -130,3 +131,4 @@ See `WALKTHROUGH_VIDEO.txt`
 3. **Server-side section content redaction** — filter Delta ops before delivery based on `section_shares` so inaccessible content never reaches the client
 4. **S3/R2 storage adapter** — swap local disk writes for Cloudflare R2 (free tier, S3-compatible) so uploaded images survive Render redeploys
 5. **Rate limiting** on the grammar-check proxy — a leaky-bucket limiter per IP to stay within LanguageTool's free tier under load
+6. **Bug Fixing** Table and Image Insert 
