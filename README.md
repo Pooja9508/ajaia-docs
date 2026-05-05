@@ -2,7 +2,7 @@
 
 A professional collaborative document editor built as a take-home assessment for Ajaia LLC.
 
-**Live URL:** _(paste Render URL after deployment)_  
+**Live URL:** _https://ajaia-docs-zi93.onrender.com
 **Demo credentials:** alice / password123 · bob / password123 · carol / password123
 
 ---
